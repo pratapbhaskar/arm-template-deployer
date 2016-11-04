@@ -1,0 +1,56 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "iotHubName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the IotHub to be deployed"
+      }
+    },
+    "iotHubSku": {
+      "type": "string",
+      "defaultValue": "Free",
+      "allowedValues": ["Free","S1","S2"],
+      "metadata": { "description": "Free/S1/S2" }
+    },
+    "iotHubTier": {
+      "type": "string",
+      "defaultValue": "Free"
+    },
+    "iotHubCapacity": {
+      "type": "int",
+      "defaultValue": 1
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "iotHubVersion": "2016-02-03",
+    "iotHubResourceId": "[resourceId('Microsoft.Devices/Iothubs', parameters('iotHubName'))]",
+    "iotHubKeyName": "iothubowner",
+    "iotHubKeyResource": "[resourceId('Microsoft.Devices/Iothubs/Iothubkeys', parameters('iotHubName'), variables('iotHubKeyName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('iotHubVersion')]",
+      "location": "[variables('location')]",
+      "name": "[parameters('iotHubName')]",
+      "sku": {
+        "name": "[parameters('iotHubSku')]",
+        "tier": "[parameters('iotHubTier')]",
+        "capacity": "[parameters('iotHubCapacity')]"
+      },
+      "type": "Microsoft.Devices/IotHubs"
+    }
+  ],
+  "outputs": {
+    "iotHubHostName": {
+      "type": "string",
+      "value": "[reference(variables('iotHubResourceId')).hostName]"
+    },
+    "iotHubKeys": {
+      "type": "object",
+      "value": "[listKeys(variables('iotHubResourceId'), variables('iotHubVersion'))]"
+    }
+  }
+}
